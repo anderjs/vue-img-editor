@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 528 396" fill="none">
+  <defs>
+    <linearGradient id="sky" x1="264" x2="264" y1="0" y2="396" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#293B43"/>
+      <stop offset=".54" stop-color="#8B806C"/>
+      <stop offset="1" stop-color="#D0A06C"/>
+    </linearGradient>
+    <linearGradient id="water" x1="264" x2="264" y1="252" y2="396" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#637C77"/>
+      <stop offset="1" stop-color="#243B3A"/>
+    </linearGradient>
+    <linearGradient id="mountain" x1="264" x2="264" y1="155" y2="310" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#78827A"/>
+      <stop offset="1" stop-color="#334541"/>
+    </linearGradient>
+    <clipPath id="frame">
+      <rect width="528" height="396" rx="12"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+    <path fill="url(#sky)" d="M0 0h528v396H0z"/>
+    <circle cx="381" cy="155" r="40" fill="#E6C595" fill-opacity=".82"/>
+    <path fill="#D8B88B" fill-opacity=".2" d="M0 198c82-29 139-23 222-8s172 10 306-23v96H0z"/>
+    <path fill="url(#mountain)" d="m0 252 92-65 47 29 83-91 54 54 47-36 91 86 50-37 64 46v158H0z"/>
+    <path fill="#293C39" d="m0 272 102-43 56 28 83-52 67 47 72-37 70 42 78-27v166H0z"/>
+    <path fill="url(#water)" d="M0 270c103 12 179-2 270 7 87 9 169-8 258-2v121H0z"/>
+    <path stroke="#C8B28D" stroke-opacity=".37" stroke-width="2" d="M0 305c104 11 176 7 272 11 91 4 162-6 256-1M0 338c85 4 160 3 235 8 115 8 193-2 293 1"/>
+    <path fill="#172724" fill-opacity=".32" d="M0 0h528v396H0z"/>
+    <path stroke="#D9E0D4" stroke-opacity=".55" d="M22 54V22h32M474 22h32v32M22 342v32h32m420 0h32v-32"/>
+  </g>
+</svg>
