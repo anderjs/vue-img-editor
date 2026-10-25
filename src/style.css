@@ -11,17 +11,21 @@
   --surface-hover: #263139;
 
   --primary: #42b883;
-  --primary-hover: #35a475;
-  --primary-soft: #8bcdb0;
-
   --border: #344149;
-
   --text-primary: #f2f5f4;
   --text-secondary: #a1afb4;
-  --text-muted: #718087;
+}
 
-  --danger: #ef7777;
-  --warning: #e9b866;
+.app-light {
+  color-scheme: light;
+
+  --background: #f8faf9;
+  --surface: #ffffff;
+  --surface-hover: #edf3f0;
+  --primary: #2f966b;
+  --border: #dce5e0;
+  --text-primary: #182721;
+  --text-secondary: #60736a;
 }
 
 @theme inline {
@@ -30,21 +34,22 @@
   --color-surface-hover: var(--surface-hover);
 
   --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-primary-soft: var(--primary-soft);
-
   --color-border: var(--border);
-
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
-  --color-text-muted: var(--text-muted);
-
-  --color-danger: var(--danger);
-  --color-warning: var(--warning);
 }
 
 @layer base {
+  html,
+  body,
+  #app {
+    width: 100%;
+    min-width: 320px;
+    height: 100%;
+  }
+
   body {
+    margin: 0;
     background-color: var(--background);
     color: var(--text-primary);
   }

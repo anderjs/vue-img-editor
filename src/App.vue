@@ -1,7 +1,7 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import Layout from './layouts/Layout.vue'
+</script>
+
 <template>
-  <AppLayout>
-    <router-view />
-  </AppLayout>
+  <Layout />
 </template>
-<style scoped></style>
