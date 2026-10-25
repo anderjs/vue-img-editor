@@ -29,6 +29,18 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 pnpm install
 ```
 
+## PrimeVue and dark mode
+
+PrimeVue is configured with the Aura theme. Import components from `primevue/<component>` where they are used. Tailwind CSS v4 is integrated with PrimeVue's `tailwindcss-primeui` utilities, including theme-aware colors such as `bg-primary` and `text-muted-color`.
+
+PrimeVue and Tailwind use the same `.app-dark` selector. Add or remove that class on the document root to switch both themes together:
+
+```ts
+document.documentElement.classList.toggle('app-dark')
+```
+
+Tailwind's `dark:` variant follows the same selector.
+
 ### Compile and Hot-Reload for Development
 
 ```sh
