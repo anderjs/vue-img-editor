@@ -25,7 +25,7 @@ export const useEditorStore = defineStore('editor', {
       const contrast = resolveContrast(state.brightness.contrast)
 
       return {
-        filter: `contrast(${contrast}%) brightness(${exposure}%)`,
+        filter: `contrast(${contrast}) brightness(${exposure})`,
       }
     },
     disabled: (state) => !state.image,
@@ -35,4 +35,5 @@ export const useEditorStore = defineStore('editor', {
       this.image = upload
     },
   },
+
 })
