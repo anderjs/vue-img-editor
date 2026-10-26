@@ -1,5 +1,9 @@
 import type { IEditorState } from '@/stores/editor'
-import type { ImageRenderer, ShaderParameters } from '@/utils/webgl-renderer'
+import {
+  createRendererFromElements,
+  type ImageRenderer,
+  type ShaderParameters,
+} from '@/utils/webgl-renderer'
 import { watch, shallowRef, onBeforeUnmount, type Ref, computed } from 'vue'
 
 type ComposableWebGLContext = {
@@ -8,8 +12,20 @@ type ComposableWebGLContext = {
   readonly adjusments: Ref<IEditorState['brightness']>
 }
 
+type Throttler = {
+  frame: number | null;
+}
+
 export function useImageWebGL({ image, canvas, adjusments }: ComposableWebGLContext) {
   const renderer = shallowRef<ImageRenderer | null>(null)
+
+  /**
+   * @description
+   * Throttler.
+   */
+  const throttle: Throttler = {
+    frame: null,
+  }
 
   /**
    * @description
@@ -24,7 +40,13 @@ export function useImageWebGL({ image, canvas, adjusments }: ComposableWebGLCont
    * Render context.
    */
   const render = (): void => {
-    renderer.value?.render(parameters.value satisfies ShaderParameters)
+    if (throttle.frame === null) {
+      throttle.frame = requestAnimationFrame(() => {
+        throttle.frame = null
+
+        synchronize()
+      })
+    }
   }
 
   /**
@@ -33,10 +55,26 @@ export function useImageWebGL({ image, canvas, adjusments }: ComposableWebGLCont
    */
   const synchronize = (): void => {
     if (image?.value && canvas?.value) {
-      const imageRef = image.value;
-      const canvasRef = canvas.value;
-
-
+      renderer.value = createRendererFromElements(image.value, canvas.value, adjusments.value)
     }
   }
+
+
+  /**
+   * @description
+   * Watch lifecycle.
+   */
+  watch(parameters, render, { flush: "post" })
+
+  /**
+   * @description
+   * Unmount lifecycle.
+   */
+  onBeforeUnmount(() => {
+    if (throttle.frame) {
+      cancelAnimationFrame(throttle.frame)
+    }
+
+    renderer.value?.destroy()
+  })
 }
