@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Bars, Moon, Sun, Times, Camera } from '@primeicons/vue'
+
 import Button from 'primevue/button'
+import Adjustments from '@/components/AppAdjusments.vue'
 
 defineOptions({ name: 'AppLayout' })
 
@@ -65,7 +67,9 @@ applyTheme()
       </main>
 
       <aside id="application-sidebar" class="sidebar" aria-label="Sidebar">
-        <nav class="sidebar-navigation" aria-label="Main navigation" />
+        <nav class="sidebar-navigation" aria-label="Main navigation">
+          <Adjustments />
+        </nav>
       </aside>
     </div>
 
@@ -158,8 +162,8 @@ applyTheme()
 
 .sidebar {
   display: flex;
-  width: 236px;
-  flex: 0 0 236px;
+  width: 250px;
+  flex: 0 0 250px;
   flex-direction: column;
   padding: 24px 14px;
   border-left: 1px solid var(--border);

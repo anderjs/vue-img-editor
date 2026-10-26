@@ -1,22 +1,51 @@
 <script lang="ts" setup>
-import FileUpload from 'primevue/fileupload'
-import UploadControl from './AppUploadControl.vue'
+import Preview from './AppPreview.vue'
 import UploadEmptyState from './AppUploadEmptyState.vue'
-import { uploadStyles } from '@/common/app.styles'
+
+import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
+
+import { useToast } from 'primevue/usetoast'
+import { useEditorStore } from '@/stores/editor.ts'
 import { useUploadActionBindings } from '@/utils/uploadActionBindings'
 
-const { bind, choose, clear, upload } = useUploadActionBindings()
+import { uploadStyles } from '@/common/app.styles'
+import type { IUpload } from '@/common/app.types.ts'
+
+const toast = useToast()
+
+const editor = useEditorStore()
+
+const { bind, choose } = useUploadActionBindings()
+
+async function handleSelect({ files }: FileUploadSelectEvent) {
+  if (files && Array.isArray(files)) {
+    const file = files[0] as IUpload
+
+    try {
+      editor.setPreview(file)
+    } catch {
+      toast.add({
+        detail: 'There was an error uploading an Image',
+        summary: 'Upload error',
+        severity: 'error',
+      })
+    }
+  }
+}
 </script>
 
 <template>
   <div class="upload-stage">
+    <Preview />
     <FileUpload
       name="image"
       mode="advanced"
       accept="image/*"
+      v-if="!editor.image"
       :pt="uploadStyles.pt"
       :multiple="true"
       :max-file-size="1000000"
+      @select="handleSelect"
     >
       <template #header="{ chooseCallback, uploadCallback, clearCallback }">
         <span
@@ -28,15 +57,6 @@ const { bind, choose, clear, upload } = useUploadActionBindings()
                 upload: uploadCallback,
               })
           "
-        />
-      </template>
-      <template #content="{ files, removeFileCallback, messages }">
-        <UploadControl
-          :files="files"
-          :messages="messages ?? []"
-          :on-clear="clear"
-          :on-upload="upload"
-          :remove-file-callback="removeFileCallback"
         />
       </template>
       <template #empty>

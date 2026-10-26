@@ -2,8 +2,8 @@ import { shallowRef, type ComponentPublicInstance } from 'vue'
 
 export type UploadActions = {
   clear: () => void
-  choose: () => void
-  upload: () => void
+  choose?: () => void
+  upload?: () => void
 }
 
 export const useUploadActionBindings = () => {
