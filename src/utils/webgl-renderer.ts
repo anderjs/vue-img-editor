@@ -1,19 +1,19 @@
 import { createProgram } from '@/shaders/program'
-import type { IEditorState } from '@/stores/editor'
+import type { ShaderParameters } from '@/utils/filter'
 
 interface RendererResources {
   readonly gl: WebGL2RenderingContext
   readonly program: WebGLProgram
   readonly texture: WebGLTexture
-  readonly adjusments: IEditorState['brightness']
-  readonly imageLocation: WebGLUniformLocation | null
+  readonly geometry: FullscreenQuad
+  readonly blackLocation: WebGLUniformLocation | null
+  readonly whitesLocation: WebGLUniformLocation | null
   readonly shadowsLocation: WebGLUniformLocation | null
   readonly contrastLocation: WebGLUniformLocation | null
   readonly exposureLocation: WebGLUniformLocation | null
   readonly highlightsLocation: WebGLUniformLocation | null
+  readonly imageLocation: WebGLUniformLocation | null
 }
-
-export type ShaderParameters = Omit<IEditorState['brightness'], 'black' | 'whites'>
 
 export interface ImageRenderer {
   render: (params: ShaderParameters) => void
@@ -21,172 +21,183 @@ export interface ImageRenderer {
 }
 
 export interface FullscreenQuad {
-  vertexCount: number
-  vertexArray: WebGLVertexArrayObject
-  vertexBuffer: WebGLBuffer
+  readonly vertexCount: number
+  readonly vertexArray: WebGLVertexArrayObject
+  readonly vertexBuffer: WebGLBuffer
 }
 
 export function createRendererFromElements(
   image: HTMLImageElement,
   canvas: HTMLCanvasElement,
-  adjusments: RendererResources['adjusments'],
-) {
-  const gl = canvas.getContext('webgl2')
+): ImageRenderer {
+  const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true })
 
-  if (gl) {
-    const program = createProgram(gl)
-
-    const texture = createTexture(gl, image)
-
-    if (program) {
-      const geometry = createFullscreenQuad(gl, program)
-
-      const resources = {
-        gl,
-        program,
-        texture,
-        adjusments,
-        ...geometry,
-        imageLocation: gl.getUniformLocation(program, 'uImage'),
-        shadowsLocation: gl.getAttribLocation(program, 'uShadows'),
-        exposureLocation: gl.getUniformLocation(program, 'uExposure'),
-        contrastLocation: gl.getUniformLocation(program, 'uContrast'),
-        highlightsLocation: gl.getUniformLocation(program, 'uHighlights'),
-      } as RendererResources
-
-      return createRenderer(resources)
-    }
+  if (!gl) {
+    throw new Error('WebGL2 is not available')
   }
 
-  throw new Error('WebGL not available')
+  const program = createProgram(gl)
+  let texture: WebGLTexture | null = null
+  let geometry: FullscreenQuad | null = null
+
+  try {
+    texture = createTexture(gl, image)
+    geometry = createFullscreenQuad(gl, program)
+    const resources: RendererResources = {
+      gl,
+      program,
+      texture,
+      geometry,
+      imageLocation: gl.getUniformLocation(program, 'uImage'),
+      blackLocation: gl.getUniformLocation(program, 'uBlack'),
+      whitesLocation: gl.getUniformLocation(program, 'uWhites'),
+      shadowsLocation: gl.getUniformLocation(program, 'uShadows'),
+      contrastLocation: gl.getUniformLocation(program, 'uContrast'),
+      exposureLocation: gl.getUniformLocation(program, 'uExposure'),
+      highlightsLocation: gl.getUniformLocation(program, 'uHighlights'),
+    }
+
+    return createRenderer(resources)
+  } catch (error) {
+    if (geometry) {
+      gl.deleteVertexArray(geometry.vertexArray)
+      gl.deleteBuffer(geometry.vertexBuffer)
+    }
+
+    if (texture) {
+      gl.deleteTexture(texture)
+    }
+
+    gl.deleteProgram(program)
+
+    throw error
+  }
 }
 
-export function createFullscreenQuad(gl: WebGL2RenderingContext, program: WebGLProgram) {
-  const vArray = gl.createVertexArray()
+export function createFullscreenQuad(
+  gl: WebGL2RenderingContext,
+  program: WebGLProgram,
+): FullscreenQuad {
+  const vertexArray = gl.createVertexArray()
+  const vertexBuffer = gl.createBuffer()
 
-  const vBuffer = gl.createBuffer()
+  if (!vertexArray || !vertexBuffer) {
+    if (vertexArray) gl.deleteVertexArray(vertexArray)
+    if (vertexBuffer) gl.deleteBuffer(vertexBuffer)
+    throw new Error('Fullscreen quad could not be created')
+  }
 
-  if (vArray && vBuffer) {
-    gl.bindVertexArray(vArray)
-    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer)
+  gl.bindVertexArray(vertexArray)
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
 
-    // prettier-ignore
-    const vortex = new Float32Array([
-      -1, -1, 0, 0,
-       1, -1, 1, 0,
-      -1,  1, 0, 1,
+  // prettier-ignore
+  const vertices = new Float32Array([
+    -1, -1, 0, 0,
+     1, -1, 1, 0,
+    -1,  1, 0, 1,
 
-      -1,  1, 0, 1,
-       1, -1, 1, 0,
-       1,  1, 1, 1,
-    ])
+    -1,  1, 0, 1,
+     1, -1, 1, 0,
+     1,  1, 1, 1,
+  ])
 
-    gl.bufferData(gl.ARRAY_BUFFER, vortex, gl.STATIC_DRAW)
+  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
 
-    const uvLoc = gl.getAttribLocation(program, 'aUv')
-    const posLoc = gl.getAttribLocation(program, 'aPosition')
+  const uvLocation = gl.getAttribLocation(program, 'aUv')
+  const positionLocation = gl.getAttribLocation(program, 'aPosition')
 
-    if (uvLoc === -1) {
-      throw new Error('aUv Not Found')
-    }
-
-    if (posLoc === -1) {
-      throw new Error('posLoc Not Found')
-    }
-
-    const stride = 4 * Float32Array.BYTES_PER_ELEMENT
-    const uvOffset = 2 * Float32Array.BYTES_PER_ELEMENT
-    const posOffset = 0
-
-    gl.enableVertexAttribArray(posLoc)
-    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, stride, posOffset)
-
-    gl.enableVertexAttribArray(uvLoc)
-    gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, stride, uvOffset)
-
+  if (uvLocation === -1 || positionLocation === -1) {
     gl.bindVertexArray(null)
     gl.bindBuffer(gl.ARRAY_BUFFER, null)
+    gl.deleteVertexArray(vertexArray)
+    gl.deleteBuffer(vertexBuffer)
+    throw new Error('Fullscreen quad attributes were not found')
+  }
 
-    return {
-      vertexCount: 6,
-      vertexArray: vArray,
-      vertexBuffer: vBuffer,
-    } as FullscreenQuad
+  const stride = 4 * Float32Array.BYTES_PER_ELEMENT
+  const uvOffset = 2 * Float32Array.BYTES_PER_ELEMENT
+
+  gl.enableVertexAttribArray(positionLocation)
+  gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, stride, 0)
+  gl.enableVertexAttribArray(uvLocation)
+  gl.vertexAttribPointer(uvLocation, 2, gl.FLOAT, false, stride, uvOffset)
+
+  gl.bindVertexArray(null)
+  gl.bindBuffer(gl.ARRAY_BUFFER, null)
+
+  return {
+    vertexCount: 6,
+    vertexArray,
+    vertexBuffer,
   }
 }
 
 export function createTexture(gl: WebGL2RenderingContext, image: HTMLImageElement): WebGLTexture {
   const texture = gl.createTexture()
 
-  if (texture) {
-    gl.activeTexture(gl.TEXTURE0)
-
-    gl.bindTexture(gl.TEXTURE_2D, texture)
-
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
-
-    gl.bindTexture(gl.TEXTURE_2D, null)
-
-    return texture
+  if (!texture) {
+    throw new Error('Texture could not be created')
   }
 
-  throw new Error('Texture could not be created')
+  gl.activeTexture(gl.TEXTURE0)
+  gl.bindTexture(gl.TEXTURE_2D, texture)
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
+  gl.bindTexture(gl.TEXTURE_2D, null)
+
+  return texture
 }
 
 /**
  * @description
- * Create render context to connect to WebGL2.
+ * Creates the render context that connects editor parameters to WebGL uniforms.
  */
 export function createRenderer({
   gl,
   texture,
   program,
-  imageLocation,
+  geometry,
+  blackLocation,
+  whitesLocation,
   shadowsLocation,
-  exposureLocation,
   contrastLocation,
+  exposureLocation,
   highlightsLocation,
+  imageLocation,
 }: RendererResources): ImageRenderer {
-  const render = ({ shadows, contrast, exposure, highlights }: ShaderParameters): void => {
-    /**
-     * @description
-     * Enabling texture.
-     */
+  const render = ({
+    black,
+    whites,
+    shadows,
+    contrast,
+    exposure,
+    highlights,
+  }: ShaderParameters): void => {
     gl.useProgram(program)
+    gl.bindVertexArray(geometry.vertexArray)
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, texture)
-
-    /**
-     * @description
-     * THE uniform1i is an OpenGL function used to specify the value of a single integer uniform variable or to bind a texture unit index to a sampler uniform in a GLSL shader.
-     * The uniform1f method is a WebGL and OpenGL function used to specify the value of a single floating-point uniform variable in a shader program, as detailed in the MDN.
-     */
-    gl.uniform1i(imageLocation, 0)
+    gl.uniform1f(blackLocation, black)
+    gl.uniform1f(whitesLocation, whites)
     gl.uniform1f(shadowsLocation, shadows)
     gl.uniform1f(contrastLocation, contrast)
     gl.uniform1f(exposureLocation, exposure)
     gl.uniform1f(highlightsLocation, highlights)
-
-    gl.drawArrays(gl.TRIANGLES, 0, 6)
+    gl.uniform1i(imageLocation, 0)
+    gl.drawArrays(gl.TRIANGLES, 0, geometry.vertexCount)
+    gl.bindVertexArray(null)
   }
 
   const destroy = (): void => {
     gl.deleteTexture(texture)
+    gl.deleteVertexArray(geometry.vertexArray)
+    gl.deleteBuffer(geometry.vertexBuffer)
     gl.deleteProgram(program)
   }
 
-  return {
-    render,
-    destroy,
-  }
+  return { render, destroy }
 }

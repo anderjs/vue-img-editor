@@ -13,10 +13,11 @@ const controls = z.number().min(-100).max(100)
  */
 export const brightnessSchema = z.object({
   black: controls.default(0),
+  whites: controls.default(0),
   shadows: controls.default(0),
   contrast: controls.default(0),
-  highlights: controls.default(0),
   exposure: z.number().min(EXPOSURE_MIN).max(EXPOSURE_MAX).default(0),
+  highlights: controls.default(0),
 })
 
 export type Brightness = z.infer<typeof brightnessSchema>;

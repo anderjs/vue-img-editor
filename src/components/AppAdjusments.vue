@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia'
 
 import Slider from 'primevue/slider'
-import Divider from 'primevue/Divider'
+import Divider from 'primevue/divider'
 import { Form } from '@primevue/forms'
 
 import { useEditorStore } from '@/stores/editor'
@@ -13,15 +13,12 @@ import { brightnessSchema, EXPOSURE_MIN, EXPOSURE_MAX, MIN, MAX } from '@/schema
 const brightnessResolver = zodResolver(brightnessSchema)
 
 const { disabled, brightness } = storeToRefs(useEditorStore())
-
 </script>
 
 <template>
   <div>
-    <group>
-      <div class="text-xs text-text-secondary text-center mb-2.5">
-        Brightness
-      </div>
+    <div>
+      <div class="text-xs text-text-secondary text-center mb-2.5">Brightness</div>
       <Form class="brightness-form" :initialValues="brightness" :resolver="brightnessResolver">
         <div class="brightness-field">
           <label class="brightness-label" for="black">Black</label>
@@ -34,6 +31,18 @@ const { disabled, brightness } = storeToRefs(useEditorStore())
             :disabled="disabled"
           />
           <span class="label">{{ brightness.black }}</span>
+        </div>
+        <div class="brightness-field">
+          <label class="brightness-label" for="whites">Whites</label>
+          <Slider
+            v-model="brightness.whites"
+            name="whites"
+            :step="1"
+            :max="MAX"
+            :min="MIN"
+            :disabled="disabled"
+          />
+          <span class="label">{{ brightness.whites }}</span>
         </div>
         <div class="brightness-field">
           <label class="brightness-label" for="shadows">Shadows</label>
@@ -84,7 +93,7 @@ const { disabled, brightness } = storeToRefs(useEditorStore())
           <span class="label">{{ brightness.highlights }}</span>
         </div>
       </Form>
-    </group>
+    </div>
     <Divider />
   </div>
 </template>
@@ -94,7 +103,7 @@ const { disabled, brightness } = storeToRefs(useEditorStore())
 .brightness-field {
   display: flex;
   flex-direction: column;
-  gap: 0.500rem;
+  gap: 0.5rem;
 }
 
 .brightness-field {

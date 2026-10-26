@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 
 import { mount } from '@vue/test-utils'
+import { createPinia } from 'pinia'
 import { Moon, Sun } from '@primeicons/vue'
 import PrimeVue from 'primevue/config'
 import App from '../App.vue'
@@ -9,7 +10,10 @@ import { ui } from '../config/prime.ui'
 const mountApp = () =>
   mount(App, {
     global: {
-      plugins: [[PrimeVue, ui]],
+      plugins: [createPinia(), [PrimeVue, ui]],
+      stubs: {
+        RouterView: true,
+      },
     },
   })
 

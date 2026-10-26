@@ -13,6 +13,7 @@ export const useEditorStore = defineStore('editor', {
     image: null,
     brightness: {
       black: 0,
+      whites: 0,
       shadows: 0,
       contrast: 0,
       exposure: 0,
