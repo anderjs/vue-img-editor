@@ -53,12 +53,14 @@ export default defineConfig({
     },
     {
       name: 'firefox',
+      grepInvert: /@chromium/,
       use: {
         ...devices['Desktop Firefox'],
       },
     },
     {
       name: 'webkit',
+      grepInvert: /@chromium/,
       use: {
         ...devices['Desktop Safari'],
       },

@@ -4,58 +4,55 @@ import fragmentShaderSource from './image.frag.glsl?raw'
 
 /**
  * @description
- * Reads glsl files from our shaders.
+ * Reads GLSL files and creates a linked WebGL2 program.
  * @param render - WebGL2 rendering context.
  */
 export const createProgram = (render: WebGL2RenderingContext): WebGLProgram => {
-  /**
-   * @description
-   * Creates an engine reading the vertex glsl.
-   */
-  const vertexShader = createEngine({
-    gl: render,
-    type: render.VERTEX_SHADER,
-    source: vertexShaderSource,
-  })
+  let vertexShader: WebGLShader | null = null
+  let fragmentShader: WebGLShader | null = null
+  let program: WebGLProgram | null = null
 
-  /**
-   * @description
-   * Creates an engine reading the fragment glsl.
-   */
-  const fragmentShader = createEngine({
-    gl: render,
-    type: render.FRAGMENT_SHADER,
-    source: fragmentShaderSource,
-  })
+  try {
+    vertexShader = createEngine({
+      gl: render,
+      type: render.VERTEX_SHADER,
+      source: vertexShaderSource,
+    })
+    fragmentShader = createEngine({
+      gl: render,
+      type: render.FRAGMENT_SHADER,
+      source: fragmentShaderSource,
+    })
+    program = render.createProgram()
 
-  /**
-   * @description
-   * Creates the program with WebGL2.
-   */
-  const program = render.createProgram()
+    if (!program) {
+      throw new Error('WebGL program could not be created')
+    }
 
-  /**
-   * @description
-   * Check if program exist.
-   */
-  if (!program) {
-    render.deleteShader(vertexShader)
-    render.deleteShader(fragmentShader)
-    throw new Error('WebGL program could not be created')
-  }
+    render.attachShader(program, vertexShader)
+    render.attachShader(program, fragmentShader)
+    render.linkProgram(program)
 
-  render.attachShader(program, vertexShader)
-  render.attachShader(program, fragmentShader)
-  render.linkProgram(program)
-  render.deleteShader(vertexShader)
-  render.deleteShader(fragmentShader)
+    if (!render.getProgramParameter(program, render.LINK_STATUS)) {
+      const log = render.getProgramInfoLog(program)
 
-  if (render.getProgramParameter(program, render.LINK_STATUS)) {
+      throw new Error(`WebGL program linking failed: ${log ?? 'unknown error'}`)
+    }
+
     return program
+  } catch (error) {
+    if (program) {
+      render.deleteProgram(program)
+    }
+
+    throw error
+  } finally {
+    if (vertexShader) {
+      render.deleteShader(vertexShader)
+    }
+
+    if (fragmentShader) {
+      render.deleteShader(fragmentShader)
+    }
   }
-
-  const log = render.getProgramInfoLog(program)
-  render.deleteProgram(program)
-
-  throw new Error(`WebGL program linking failed: ${log ?? 'unknown error'}`)
 }

@@ -1,18 +1,19 @@
 import { createProgram } from '@/shaders/program'
 import type { ShaderParameters } from '@/utils/filter'
+import { WEBGL_CONTEXT_ATTRIBUTES } from '@/utils/webgl-context'
 
 interface RendererResources {
   readonly gl: WebGL2RenderingContext
   readonly program: WebGLProgram
   readonly texture: WebGLTexture
   readonly geometry: FullscreenQuad
+  readonly imageLocation: WebGLUniformLocation | null
   readonly blackLocation: WebGLUniformLocation | null
   readonly whitesLocation: WebGLUniformLocation | null
   readonly shadowsLocation: WebGLUniformLocation | null
   readonly contrastLocation: WebGLUniformLocation | null
   readonly exposureLocation: WebGLUniformLocation | null
   readonly highlightsLocation: WebGLUniformLocation | null
-  readonly imageLocation: WebGLUniformLocation | null
 }
 
 export interface ImageRenderer {
@@ -30,14 +31,18 @@ export function createRendererFromElements(
   image: HTMLImageElement,
   canvas: HTMLCanvasElement,
 ): ImageRenderer {
-  const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true })
+  const gl = canvas.getContext('webgl2', WEBGL_CONTEXT_ATTRIBUTES)
 
   if (!gl) {
     throw new Error('WebGL2 is not available')
   }
 
+  gl.viewport(0, 0, canvas.width, canvas.height)
+
   const program = createProgram(gl)
+
   let texture: WebGLTexture | null = null
+
   let geometry: FullscreenQuad | null = null
 
   try {
@@ -109,8 +114,8 @@ export function createFullscreenQuad(
   if (uvLocation === -1 || positionLocation === -1) {
     gl.bindVertexArray(null)
     gl.bindBuffer(gl.ARRAY_BUFFER, null)
-    gl.deleteVertexArray(vertexArray)
     gl.deleteBuffer(vertexBuffer)
+    gl.deleteVertexArray(vertexArray)
     throw new Error('Fullscreen quad attributes were not found')
   }
 
@@ -133,23 +138,44 @@ export function createFullscreenQuad(
 }
 
 export function createTexture(gl: WebGL2RenderingContext, image: HTMLImageElement): WebGLTexture {
+  const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE) as number
+
+  if (image.naturalWidth > maxTextureSize || image.naturalHeight > maxTextureSize) {
+    throw new Error(
+      `Image dimensions ${image.naturalWidth}x${image.naturalHeight} exceed the WebGL texture limit of ${maxTextureSize}px`,
+    )
+  }
+
   const texture = gl.createTexture()
 
   if (!texture) {
     throw new Error('Texture could not be created')
   }
 
-  gl.activeTexture(gl.TEXTURE0)
-  gl.bindTexture(gl.TEXTURE_2D, texture)
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
-  gl.bindTexture(gl.TEXTURE_2D, null)
+  try {
+    gl.activeTexture(gl.TEXTURE0)
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
 
-  return texture
+    const uploadError = gl.getError()
+
+    if (uploadError !== gl.NO_ERROR) {
+      throw new Error(`Texture upload failed with WebGL error ${uploadError}`)
+    }
+
+    return texture
+  } catch (error) {
+    gl.deleteTexture(texture)
+
+    throw error
+  } finally {
+    gl.bindTexture(gl.TEXTURE_2D, null)
+  }
 }
 
 /**

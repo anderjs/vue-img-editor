@@ -17,7 +17,7 @@ const { image, brightness, filter } = storeToRefs(useEditorStore())
  * @description
  * WebGL2 rendering context engine.
  */
-const { error, synchronize } = useImageWebGL({
+const { error, isReady, synchronize } = useImageWebGL({
   image: preview,
   canvas,
   adjustments: brightness,
@@ -48,9 +48,10 @@ function handleImageLoad(): void {
         :src="image.objectURL"
         alt="preview"
         class="preview-image"
+        :class="{ 'preview-image-hidden': isReady }"
         @load="handleImageLoad"
       />
-      <canvas ref="canvas" class="canvas" aria-hidden="true" />
+      <canvas v-show="isReady" ref="canvas" class="canvas" aria-hidden="true" />
     </figure>
   </section>
 </template>
@@ -85,7 +86,9 @@ function handleImageLoad(): void {
   display: flex;
   max-width: 100%;
   max-height: calc(100dvh - 140px);
+  box-sizing: border-box;
   margin: 0;
+  border: 4px solid var(--border);
   animation: preview-enter 180ms ease-out both;
 }
 
@@ -94,7 +97,10 @@ function handleImageLoad(): void {
   max-width: 100%;
   max-height: calc(100dvh - 140px);
   object-fit: contain;
-  border: 4px solid var(--border);
+}
+
+.preview-image-hidden {
+  visibility: hidden;
 }
 
 @keyframes preview-enter {

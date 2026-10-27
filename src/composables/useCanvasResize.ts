@@ -1,4 +1,5 @@
 import { onBeforeUnmount, shallowRef, type Ref } from 'vue'
+import { WEBGL_CONTEXT_ATTRIBUTES } from '@/utils/webgl-context'
 
 interface UseCanvasResizeOptions {
   readonly canvas: Readonly<Ref<HTMLCanvasElement | null>>
@@ -24,7 +25,7 @@ export function useCanvasResize({ canvas, image }: UseCanvasResizeOptions) {
     canvasElement.style.height = `${height}px`
 
     canvasElement
-      .getContext('webgl2', { preserveDrawingBuffer: true })
+      .getContext('webgl2', WEBGL_CONTEXT_ATTRIBUTES)
       ?.viewport(0, 0, canvasElement.width, canvasElement.height)
   }
 

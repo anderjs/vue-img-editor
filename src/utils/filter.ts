@@ -1,7 +1,7 @@
 import type { Brightness } from '@/schema/light'
 
 export const resolveContrast = (contrast: number) => 1 + contrast / 100
-export const resolveExposure = (exposure: number) => 1 + exposure / 100
+export const resolveExposure = (exposure: number) => 2 ** exposure
 
 export type ShaderParameters = Pick<
   Brightness,
