@@ -27,10 +27,13 @@ describe('App', () => {
     expect(wrapper.find('main').exists()).toBe(true)
     expect(wrapper.find('footer').exists()).toBe(true)
     expect(wrapper.find('.shell-body').element.firstElementChild).toBe(
+      wrapper.find('.left-sidebar').element,
+    )
+    expect(wrapper.find('.shell-body').element.children[1]).toBe(
       wrapper.find('main').element,
     )
     expect(wrapper.find('.shell-body').element.lastElementChild).toBe(
-      wrapper.find('aside').element,
+      wrapper.find('#application-sidebar').element,
     )
     expect(wrapper.text()).not.toContain('Workspace')
     expect(wrapper.text()).not.toContain('Editor')

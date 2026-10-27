@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Bars, Moon, Sun, Times, Camera } from '@primeicons/vue'
+import { Bars, Moon, Sun, Times } from '@primeicons/vue'
 
 import Button from 'primevue/button'
 import Adjustments from '@/components/AppAdjusments.vue'
+import AppGallery from '@/components/AppGallery.vue'
 
 defineOptions({ name: 'AppLayout' })
 
@@ -43,9 +44,7 @@ applyTheme()
       </Button>
 
       <div class="brand" aria-label="Luma">
-        <span aria-hidden="true">
-          <Camera class="brand-icon" />
-        </span>
+        <img class="brand-logo" src="/logo.png" alt="" aria-hidden="true" />
         <span>Luma</span>
       </div>
 
@@ -64,6 +63,10 @@ applyTheme()
     </header>
 
     <div class="shell-body" :class="{ 'sidebar-open': isSidebarOpen }">
+      <aside class="left-sidebar" aria-label="Photo gallery">
+        <AppGallery />
+      </aside>
+
       <main class="main-content">
         <slot />
       </main>
@@ -129,10 +132,11 @@ applyTheme()
   background: color-mix(in srgb, var(--primary) 10%, var(--surface));
 }
 
-.brand-icon {
-  width: 17px;
-  height: 17px;
-  color: var(--primary);
+.brand-logo {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
 }
 
 .photo-actions-host {
@@ -158,6 +162,17 @@ applyTheme()
 .shell-body {
   display: flex;
   min-height: 0;
+}
+
+.left-sidebar {
+  width: 110px;
+  flex: 0 0 110px;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 30px 10px 18px;
+  background: var(--surface);
+  overflow: auto;
 }
 
 .sidebar-toggle:hover {
@@ -240,6 +255,10 @@ applyTheme()
 
   .shell-body {
     position: relative;
+  }
+
+  .left-sidebar {
+    display: none;
   }
 
   .sidebar {
