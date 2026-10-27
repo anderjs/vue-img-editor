@@ -10,6 +10,7 @@ import { useUploadActionBindings } from '@/utils/uploadActionBindings'
 
 import { uploadStyles } from '@/common/app.styles'
 import type { IUpload } from '@/common/app.types.ts'
+import config from '@/config'
 
 const toast = useToast()
 
@@ -23,6 +24,12 @@ async function handleSelect({ files }: FileUploadSelectEvent) {
 
     try {
       editor.setPreview(file)
+
+      toast.add({
+        detail: "Image upload successfully",
+        summary: "Upload",
+        severity: "success"
+      })
     } catch {
       toast.add({
         detail: 'There was an error uploading an Image',
@@ -43,8 +50,8 @@ async function handleSelect({ files }: FileUploadSelectEvent) {
       accept="image/*"
       v-if="!editor.image"
       :pt="uploadStyles.pt"
-      :multiple="true"
-      :max-file-size="1000000"
+      :multiple="false"
+      :max-file-size="config.MAX_FILE_SIZE"
       @select="handleSelect"
     >
       <template #header="{ chooseCallback, uploadCallback, clearCallback }">
