@@ -18,10 +18,11 @@ export function useImageWebGL({ image, canvas, adjustments }: ComposableWebGLCon
   const parameters = computed<ShaderParameters>(() => resolveShaderParameters(adjustments.value))
 
   const cancelRender = (): void => {
-    if (frame.value === null) return
+    if (frame.value) {
+      cancelAnimationFrame(frame.value)
 
-    cancelAnimationFrame(frame.value)
-    frame.value = null
+      frame.value = null
+    }
   }
 
   const render = (): void => {
@@ -29,8 +30,8 @@ export function useImageWebGL({ image, canvas, adjustments }: ComposableWebGLCon
 
     frame.value = requestAnimationFrame(() => {
       frame.value = null
-      renderer.value?.render(parameters.value)
       isReady.value = renderer.value !== null
+      renderer.value?.render(parameters.value)
     })
   }
 

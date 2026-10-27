@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { Images, Refresh, Times } from '@primeicons/vue'
 import Button from 'primevue/button'
+import { Images, Refresh, Times } from '@primeicons/vue'
 
-defineProps<{
+type Props = {
   canReset: boolean
-}>()
+}
+
+defineProps<Props>()
 
 const emit = defineEmits<{
   reset: []
