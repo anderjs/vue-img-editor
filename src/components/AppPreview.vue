@@ -88,7 +88,7 @@ function handleImageLoad(): void {
   max-height: calc(100dvh - 140px);
   box-sizing: border-box;
   margin: 0;
-  border: 4px solid var(--border);
+  border: 1px solid var(--border);
   animation: preview-enter 180ms ease-out both;
 }
 

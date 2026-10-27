@@ -6,9 +6,10 @@
 :root {
   color-scheme: dark;
 
-  --background: #121619;
+  --background: #151b1e;
   --surface: #1b2227;
   --surface-hover: #263139;
+  --workspace: #101516;
 
   --primary: #42b883;
   --border: #344149;
@@ -19,9 +20,10 @@
 .app-light {
   color-scheme: light;
 
-  --background: #f8faf9;
+  --background: #f4f7f5;
   --surface: #ffffff;
   --surface-hover: #edf3f0;
+  --workspace: #edf2ef;
   --primary: #2f966b;
   --border: #dce5e0;
   --text-primary: #182721;
@@ -44,7 +46,6 @@
   body,
   #app {
     width: 100%;
-    min-width: 320px;
     height: 100%;
   }
 

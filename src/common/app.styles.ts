@@ -1,7 +1,7 @@
 export const uploadStyles = {
   pt: {
-    root: { class: 'border! border-dashed!' },
+    root: { class: 'border-0! bg-transparent!' },
     header: { class: 'hidden!' },
-    content: { class: 'p-8!' },
+    content: { class: 'p-0!' },
   },
 }

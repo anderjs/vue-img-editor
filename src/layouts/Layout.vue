@@ -85,8 +85,7 @@ applyTheme()
   width: 100%;
   height: 100vh;
   height: 100dvh;
-  min-width: 320px;
-  grid-template-rows: 64px minmax(0, 1fr) 26px;
+  grid-template-rows: 56px minmax(0, 1fr) 22px;
   overflow: hidden;
   background: var(--background);
   color: var(--text-primary);
@@ -96,9 +95,8 @@ applyTheme()
   display: flex;
   position: relative;
   align-items: center;
-  gap: 18px;
-  padding: 0 24px;
-  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  padding: 0 18px;
   background: var(--surface);
 }
 
@@ -112,11 +110,11 @@ applyTheme()
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 11px;
-  flex: 0 0 212px;
-  font-size: 16px;
+  gap: 9px;
+  flex: 0 0 auto;
+  font-size: 15px;
   font-weight: 650;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.03em;
 }
 
 .brand-mark {
@@ -130,16 +128,16 @@ applyTheme()
 }
 
 .brand-icon {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
   color: var(--primary);
 }
 
 .theme-toggle {
-  min-height: 36px;
-  gap: 9px;
+  min-height: 34px;
+  gap: 8px;
   margin-left: auto;
-  padding: 0 11px;
+  padding: 0 10px;
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
@@ -162,12 +160,13 @@ applyTheme()
 
 .sidebar {
   display: flex;
-  width: 250px;
-  flex: 0 0 250px;
+  width: 312px;
+  flex: 0 0 312px;
   flex-direction: column;
-  padding: 24px 14px;
-  border-left: 1px solid var(--border);
+  min-height: 0;
+  padding: 18px;
   background: var(--surface);
+  overflow-y: auto;
 }
 
 .sidebar-navigation {
@@ -175,15 +174,40 @@ applyTheme()
 }
 
 .main-content {
+  position: relative;
   flex: 1;
   min-width: 0;
   min-height: 0;
   overflow: auto;
-  background: var(--background);
+  background: var(--workspace);
+}
+
+.main-content::before,
+.main-content::after {
+  position: absolute;
+  z-index: 1;
+  inset: 12px;
+  pointer-events: none;
+  content: '';
+}
+
+.main-content::before {
+  background:
+    linear-gradient(var(--border), var(--border)) top left / 16px 1px no-repeat,
+    linear-gradient(var(--border), var(--border)) top left / 1px 16px no-repeat,
+    linear-gradient(var(--border), var(--border)) top right / 16px 1px no-repeat,
+    linear-gradient(var(--border), var(--border)) top right / 1px 16px no-repeat;
+}
+
+.main-content::after {
+  background:
+    linear-gradient(var(--border), var(--border)) bottom left / 16px 1px no-repeat,
+    linear-gradient(var(--border), var(--border)) bottom left / 1px 16px no-repeat,
+    linear-gradient(var(--border), var(--border)) bottom right / 16px 1px no-repeat,
+    linear-gradient(var(--border), var(--border)) bottom right / 1px 16px no-repeat;
 }
 
 .footer {
-  border-top: 1px solid var(--border);
   background: var(--surface);
 }
 
@@ -194,7 +218,7 @@ applyTheme()
 
 @media (max-width: 600px) {
   .topbar {
-    gap: 12px;
+    gap: 10px;
     padding: 0 14px;
   }
 
@@ -219,13 +243,12 @@ applyTheme()
     bottom: 0;
     right: 0;
     width: 236px;
+    flex-basis: 236px;
     padding: 20px 14px;
-    box-shadow: -8px 0 24px rgb(0 0 0 / 16%);
   }
 
   .sidebar-open .sidebar {
     display: flex;
-    flex-basis: 236px;
   }
 }
 
