@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import config from '@/config'
+import { formatSize } from '@/utils/formatSize'
 import Button from 'primevue/button'
 
 type Props = {
@@ -13,7 +15,7 @@ defineProps<Props>()
     <img class="preview-image" src="@/assets/upload-preview.svg" alt="" aria-hidden="true" />
     <p>Drop an image here, or choose one to start editing.</p>
     <Button class="choose-button" label="Choose an image" @click="onChoose" />
-    <span class="file-note">JPG, PNG, or WebP · up to 1 MB</span>
+    <span class="file-note">JPG, PNG, or WebP · up to {{ formatSize(config.MAX_FILE_SIZE) }}</span>
   </section>
 </template>
 

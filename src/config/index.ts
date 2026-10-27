@@ -1,9 +1,9 @@
 type IConfig = Readonly<{
-  MAX_FILE_SIZE: number;
-}>;
+  MAX_FILE_SIZE: number
+}>
 
 const config: IConfig = {
-  MAX_FILE_SIZE: 1_000_000_000
+  MAX_FILE_SIZE: 1_048_600_00,
 }
 
-export default config;
+export default config
