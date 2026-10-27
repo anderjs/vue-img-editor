@@ -1,6 +1,8 @@
 <script lang="ts" setup>
+import { computed } from 'vue'
 import Preview from './AppPreview.vue'
 import UploadEmptyState from './AppUploadEmptyState.vue'
+import PreviewControl from './AppPreviewControl.vue'
 
 import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
 
@@ -17,6 +19,24 @@ const toast = useToast()
 const editor = useEditorStore()
 
 const { bind, choose } = useUploadActionBindings()
+
+const uploadPt = computed(() => ({
+  ...uploadStyles.pt,
+  root: {
+    ...uploadStyles.pt.root,
+    class: [uploadStyles.pt.root.class, { 'photo-loaded': Boolean(editor.image) }],
+  },
+}))
+
+function handleReplace(chooseCallback: () => void, clearCallback: () => void) {
+  clearCallback()
+  chooseCallback()
+}
+
+function handleClose(clearCallback: () => void) {
+  clearCallback()
+  editor.closePhoto()
+}
 
 async function handleSelect({ files }: FileUploadSelectEvent) {
   if (files && Array.isArray(files)) {
@@ -48,8 +68,7 @@ async function handleSelect({ files }: FileUploadSelectEvent) {
       name="image"
       mode="advanced"
       accept="image/*"
-      v-if="!editor.image"
-      :pt="uploadStyles.pt"
+      :pt="uploadPt"
       :multiple="false"
       :max-file-size="config.MAX_FILE_SIZE"
       @select="handleSelect"
@@ -65,9 +84,19 @@ async function handleSelect({ files }: FileUploadSelectEvent) {
               })
           "
         />
+        <PreviewControl
+          v-if="editor.image"
+          :can-reset="editor.hasAdjustments"
+          @reset="editor.resetAdjustments()"
+          @replace="handleReplace(chooseCallback, clearCallback)"
+          @close="handleClose(clearCallback)"
+        />
+      </template>
+      <template #content>
+        <span aria-hidden="true" />
       </template>
       <template #empty>
-        <UploadEmptyState :on-choose="choose" />
+        <UploadEmptyState v-if="!editor.image" :on-choose="choose" />
       </template>
     </FileUpload>
   </div>
@@ -75,9 +104,26 @@ async function handleSelect({ files }: FileUploadSelectEvent) {
 
 <style scoped>
 .upload-stage {
+  position: relative;
   display: grid;
   width: 100%;
   min-height: 100%;
   place-items: center;
 }
+
+.photo-loaded {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+}
+
+.photo-loaded :deep(.p-fileupload-content) {
+  height: 100%;
+  box-sizing: border-box;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+}
+
 </style>

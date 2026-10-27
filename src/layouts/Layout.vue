@@ -49,6 +49,8 @@ applyTheme()
         <span>Luma</span>
       </div>
 
+      <div id="photo-actions" class="photo-actions-host" />
+
       <Button
         class="theme-toggle"
         text
@@ -133,10 +135,15 @@ applyTheme()
   color: var(--primary);
 }
 
+.photo-actions-host {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
 .theme-toggle {
   min-height: 34px;
   gap: 8px;
-  margin-left: auto;
   padding: 0 10px;
   color: var(--text-secondary);
   font-size: 12px;

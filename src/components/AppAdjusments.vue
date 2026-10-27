@@ -3,8 +3,8 @@ import { storeToRefs } from 'pinia'
 import Slider from 'primevue/slider'
 import Divider from 'primevue/divider'
 import { Form } from '@primevue/forms'
-import { useEditorStore } from '@/stores/editor'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
+import { useEditorStore } from '@/stores/editor'
 import { brightnessSchema, EXPOSURE_MIN, EXPOSURE_MAX, MIN, MAX } from '@/schema/light'
 
 const brightnessResolver = zodResolver(brightnessSchema)
