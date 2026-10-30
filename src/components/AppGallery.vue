@@ -38,6 +38,7 @@ const { gallery } = storeToRefs(useGalleryStore())
   aspect-ratio: 1;
   overflow: hidden;
   border-radius: 0.5rem;
+  background-color: var(--surface-hover);
 }
 
 .gallery-empty {
@@ -45,9 +46,9 @@ const { gallery } = storeToRefs(useGalleryStore())
   width: 100%;
   max-width: 64px;
   aspect-ratio: 1;
-  background-color: var(--color-surface-950);
   overflow: hidden;
   border-radius: 0.5rem;
+  background-color: var(--surface-hover);
 }
 
 .gallery-image {

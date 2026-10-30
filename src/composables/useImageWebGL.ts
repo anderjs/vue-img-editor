@@ -38,8 +38,8 @@ export function useImageWebGL({ image, canvas, adjustments }: ComposableWebGLCon
   const handleContextLost = (event: Event): void => {
     event.preventDefault()
     cancelRender()
-    renderer.value = null
     isReady.value = false
+    renderer.value = null
     error.value = new Error('WebGL context lost')
   }
 
@@ -53,12 +53,12 @@ export function useImageWebGL({ image, canvas, adjustments }: ComposableWebGLCon
     renderer.value?.destroy()
 
     try {
-      renderer.value = createRendererFromElements(imageElement, canvasElement)
       error.value = null
+      renderer.value = createRendererFromElements(imageElement, canvasElement)
       render()
     } catch (cause) {
-      renderer.value = null
       isReady.value = false
+      renderer.value = null
       error.value = cause instanceof Error ? cause : new Error('WebGL initialization failed')
     }
   }

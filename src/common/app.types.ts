@@ -11,3 +11,12 @@ export interface IUpload {
   lastModifiedDate: Date
   webkitRelativePath: string
 }
+
+export interface IGalleryImage {
+  id: string
+  name: string
+  type: string
+  size: number
+  original: Blob
+  createdAt: Date
+}

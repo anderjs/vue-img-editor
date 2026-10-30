@@ -8,6 +8,7 @@ import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
 
 import { useToast } from 'primevue/usetoast'
 import { useEditorStore } from '@/stores/editor.ts'
+import { useGalleryStore } from '@/stores/gallery.ts'
 import { useUploadActionBindings } from '@/utils/uploadActionBindings'
 
 import { uploadStyles } from '@/common/app.styles'
@@ -17,6 +18,8 @@ import config from '@/config'
 const toast = useToast()
 
 const editor = useEditorStore()
+
+const gallery = useGalleryStore()
 
 const { bind, choose } = useUploadActionBindings()
 
@@ -43,12 +46,14 @@ async function handleSelect({ files }: FileUploadSelectEvent) {
     const file = files[0] as IUpload
 
     try {
+      gallery.push(file.objectURL)
+
       editor.setPreview(file)
 
       toast.add({
-        detail: "Image upload successfully",
-        summary: "Upload",
-        severity: "success"
+        detail: 'Image upload successfully',
+        summary: 'Upload',
+        severity: 'success',
       })
     } catch {
       toast.add({
@@ -125,5 +130,4 @@ async function handleSelect({ files }: FileUploadSelectEvent) {
   background: transparent;
   pointer-events: auto;
 }
-
 </style>
